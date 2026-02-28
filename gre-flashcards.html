@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lexicon — GRE Vocabulary</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0c0f;
+    --surface: #13131a;
+    --card: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #e8c547;
+    --accent2: #7b6cf7;
+    --text: #f0ede8;
+    --muted: #7a7a8c;
+    --green: #4ade80;
+    --red: #f87171;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 10%, rgba(123,108,247,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 80% 80%, rgba(232,197,71,0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 40px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+  }
+
+  .logo span {
+    color: var(--muted);
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    font-style: italic;
+    margin-left: 8px;
+  }
+
+  .stats { display: flex; gap: 24px; align-items: center; }
+  .stat { text-align: center; }
+
+  .stat-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+  }
+  .stat-val.green { color: var(--green); }
+  .stat-val.red   { color: var(--red); }
+  .stat-val.yellow{ color: var(--accent); }
+
+  .stat-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .progress-container {
+    position: relative; z-index: 10;
+    padding: 0 40px; margin-top: 20px;
+    display: flex; align-items: center; gap: 16px;
+  }
+
+  .progress-bar {
+    flex: 1; height: 3px;
+    background: var(--border); border-radius: 2px; overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 2px; transition: width 0.5s ease;
+  }
+
+  .progress-text {
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    color: var(--muted); white-space: nowrap;
+  }
+
+  .filter-bar {
+    position: relative; z-index: 10;
+    display: flex; gap: 8px; padding: 16px 40px;
+    flex-wrap: wrap; align-items: center;
+  }
+
+  .filter-label {
+    font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.1em; margin-right: 4px;
+  }
+
+  .filter-btn {
+    padding: 5px 14px; border-radius: 20px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--muted); font-family: 'DM Sans', sans-serif;
+    font-size: 12px; cursor: pointer; transition: all 0.2s;
+  }
+  .filter-btn:hover  { border-color: var(--accent2); color: var(--text); }
+  .filter-btn.active { background: var(--accent2); border-color: var(--accent2); color: white; }
+
+  /* ── MAIN ── */
+  main {
+    position: relative; z-index: 10; flex: 1;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 20px 40px 40px;
+  }
+
+  /* ── FLASHCARD ── */
+  .card-scene {
+    perspective: 1200px;
+    width: 100%; max-width: 680px; height: 280px;
+    margin-bottom: 20px;
+  }
+
+  .card-inner {
+    width: 100%; height: 100%; position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: default;
+  }
+
+  .card-inner.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    border-radius: 20px; border: 1px solid var(--border);
+    background: var(--card);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 40px;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03);
+    overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .card-face::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  }
+
+  /* glow on answer */
+  .card-face.correct-glow {
+    border-color: var(--green);
+    box-shadow: 0 0 40px rgba(74,222,128,0.18), 0 30px 70px rgba(0,0,0,0.4);
+  }
+  .card-face.wrong-glow {
+    border-color: var(--red);
+    box-shadow: 0 0 40px rgba(248,113,113,0.18), 0 30px 70px rgba(0,0,0,0.4);
+  }
+
+  .card-back {
+    transform: rotateY(180deg);
+    align-items: flex-start; justify-content: flex-start;
+    padding: 32px 36px;
+  }
+
+  .card-type {
+    position: absolute; top: 18px; right: 18px;
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted);
+    background: rgba(255,255,255,0.04); padding: 4px 10px; border-radius: 10px;
+  }
+
+  .card-number {
+    position: absolute; top: 18px; left: 18px;
+    font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted);
+  }
+
+  .streak-badge {
+    position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+    font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent);
+    display: flex; align-items: center; gap: 4px;
+    opacity: 0; transition: opacity 0.3s; white-space: nowrap;
+  }
+  .streak-badge.visible { opacity: 1; }
+
+  .word {
+    font-family: 'Playfair Display', serif;
+    font-size: 52px; font-weight: 700;
+    text-align: center; line-height: 1.1; color: var(--text); margin-bottom: 8px;
+  }
+
+  .pronunciation {
+    font-family: 'DM Mono', monospace; font-size: 14px; color: var(--muted);
+  }
+
+  /* back */
+  .back-word {
+    font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700;
+    color: var(--accent); margin-bottom: 4px;
+  }
+  .back-pos {
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    color: var(--accent2); font-style: italic; margin-bottom: 10px;
+  }
+  .back-definition { font-size: 15px; line-height: 1.7; color: var(--text); margin-bottom: 12px; }
+  .back-example {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: 13px; color: var(--muted); line-height: 1.6;
+    padding: 10px 14px; border-left: 2px solid var(--accent2);
+    border-radius: 0 8px 8px 0; background: rgba(123,108,247,0.05); margin-bottom: 12px;
+  }
+  .back-synonyms { display: flex; flex-wrap: wrap; gap: 6px; }
+  .synonym-tag {
+    font-size: 11px; padding: 3px 10px; border-radius: 12px;
+    background: rgba(232,197,71,0.1); border: 1px solid rgba(232,197,71,0.2);
+    color: var(--accent); font-family: 'DM Mono', monospace;
+  }
+
+  /* ── MCQ ── */
+  .mcq-section { width: 100%; max-width: 680px; margin-bottom: 18px; }
+
+  .mcq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .mcq-option {
+    padding: 14px 42px 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; line-height: 1.45;
+    cursor: pointer; transition: all 0.18s;
+    text-align: left; position: relative; overflow: hidden;
+  }
+
+  .mcq-option .opt-label {
+    font-family: 'DM Mono', monospace; font-size: 9px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--muted); display: block; margin-bottom: 4px;
+  }
+
+  .mcq-option:hover:not(:disabled) {
+    border-color: var(--accent2);
+    background: rgba(123,108,247,0.08);
+    transform: translateY(-1px);
+  }
+
+  .mcq-option:disabled { cursor: default; transform: none !important; }
+
+  .mcq-option.correct {
+    border-color: var(--green); background: rgba(74,222,128,0.08);
+    color: var(--green);
+  }
+  .mcq-option.correct .opt-label { color: rgba(74,222,128,0.6); }
+  .mcq-option.correct::after {
+    content: '✓'; position: absolute; right: 14px; top: 50%;
+    transform: translateY(-50%); font-size: 15px; color: var(--green);
+  }
+
+  .mcq-option.wrong {
+    border-color: var(--red); background: rgba(248,113,113,0.07);
+    color: var(--red);
+  }
+  .mcq-option.wrong .opt-label { color: rgba(248,113,113,0.6); }
+  .mcq-option.wrong::after {
+    content: '✗'; position: absolute; right: 14px; top: 50%;
+    transform: translateY(-50%); font-size: 15px; color: var(--red);
+  }
+
+  /* highlight correct when user got it wrong or revealed */
+  .mcq-option.reveal-correct {
+    border-color: var(--green); background: rgba(74,222,128,0.05);
+  }
+  .mcq-option.reveal-correct::after {
+    content: '✓'; position: absolute; right: 14px; top: 50%;
+    transform: translateY(-50%); font-size: 15px; color: var(--green);
+  }
+
+  @keyframes optionIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .mcq-option:nth-child(1) { animation: optionIn 0.22s ease 0.04s both; }
+  .mcq-option:nth-child(2) { animation: optionIn 0.22s ease 0.09s both; }
+  .mcq-option:nth-child(3) { animation: optionIn 0.22s ease 0.14s both; }
+  .mcq-option:nth-child(4) { animation: optionIn 0.22s ease 0.19s both; }
+
+  /* ── BOTTOM CONTROLS ── */
+  .bottom-controls {
+    width: 100%; max-width: 680px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+
+  .btn {
+    padding: 11px 22px; border-radius: 12px; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 7px;
+  }
+
+  .btn-reveal {
+    background: var(--accent2); color: white;
+  }
+  .btn-reveal:hover:not(:disabled) {
+    background: #8f84ff;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(123,108,247,0.3);
+  }
+
+  .btn-skip {
+    background: rgba(255,255,255,0.05); color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-skip:hover:not(:disabled) { background: rgba(255,255,255,0.08); color: var(--text); }
+
+  .btn-next {
+    background: var(--accent); color: #0c0c0f; font-weight: 600;
+  }
+  .btn-next:hover:not(:disabled) {
+    background: #f0d060; transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(232,197,71,0.3);
+  }
+  .btn-next:disabled, .btn-reveal:disabled, .btn-skip:disabled {
+    opacity: 0.35; cursor: default; transform: none !important; box-shadow: none !important;
+  }
+
+  /* also flip card button shown on answered state */
+  .btn-flip-mini {
+    background: rgba(255,255,255,0.05); color: var(--muted);
+    border: 1px solid var(--border); font-size: 12px; padding: 9px 16px;
+  }
+  .btn-flip-mini:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+  .feedback-toast {
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    padding: 6px 14px; border-radius: 20px;
+    opacity: 0; transition: opacity 0.2s; white-space: nowrap;
+    pointer-events: none;
+  }
+  .feedback-toast.show { opacity: 1; }
+  .feedback-toast.ok  { background: rgba(74,222,128,0.12); color: var(--green); border: 1px solid rgba(74,222,128,0.25); }
+  .feedback-toast.bad { background: rgba(248,113,113,0.12); color: var(--red);   border: 1px solid rgba(248,113,113,0.25); }
+
+  .keyboard-hints {
+    margin-top: 16px;
+    display: flex; gap: 16px;
+    font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace;
+    flex-wrap: wrap; justify-content: center;
+  }
+
+  kbd {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 4px; padding: 2px 6px; font-size: 10px;
+  }
+
+  @keyframes slideInCard {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card-scene { animation: slideInCard 0.35s ease; }
+
+  @media (max-width: 640px) {
+    header { padding: 16px 20px; }
+    .filter-bar, .progress-container { padding: 0 20px; }
+    .filter-bar { padding: 12px 20px; }
+    main { padding: 14px 16px 28px; }
+    .word { font-size: 38px; }
+    .card-scene { height: 240px; }
+    .mcq-grid { grid-template-columns: 1fr; }
+    .keyboard-hints { display: none; }
+    .stats { gap: 14px; }
+    .stat-val { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Lexicon <span>GRE Edition</span></div>
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-val green" id="correct-count">0</div>
+      <div class="stat-label">Correct</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val red" id="wrong-count">0</div>
+      <div class="stat-label">Wrong</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val yellow" id="streak-count">0</div>
+      <div class="stat-label">Streak</div>
+    </div>
+  </div>
+</header>
+
+<div class="progress-container">
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <div class="progress-text" id="progress-text">0 / 0</div>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">Category:</span>
+  <button class="filter-btn active" onclick="setCategory('all', this)">All Words</button>
+  <button class="filter-btn" onclick="setCategory('adjective', this)">Adjectives</button>
+  <button class="filter-btn" onclick="setCategory('noun', this)">Nouns</button>
+  <button class="filter-btn" onclick="setCategory('verb', this)">Verbs</button>
+  <button class="filter-btn" onclick="setCategory('learning', this)">Review Pile</button>
+</div>
+
+<main>
+  <!-- CARD -->
+  <div class="card-scene" id="card-scene">
+    <div class="card-inner" id="card-inner">
+      <div class="card-face card-front" id="card-front-face">
+        <div class="card-number" id="card-num">#1</div>
+        <div class="card-type" id="card-pos-front">adjective</div>
+        <div class="streak-badge" id="streak-badge">🔥 <span id="streak-num">0</span></div>
+        <div class="word" id="word-display">abstruse</div>
+        <div class="pronunciation" id="word-pron">/æbˈstruːs/</div>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-type" id="card-pos-back">adjective</div>
+        <div class="back-word" id="back-word">abstruse</div>
+        <div class="back-pos" id="back-pos-label">adjective</div>
+        <div class="back-definition" id="back-def">Difficult to understand; obscure and esoteric in nature.</div>
+        <div class="back-example" id="back-example">"The professor's abstruse lectures left most students bewildered."</div>
+        <div class="back-synonyms" id="back-synonyms"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MCQ -->
+  <div class="mcq-section">
+    <div class="mcq-grid" id="mcq-grid"></div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="bottom-controls">
+    <button class="btn btn-skip" id="btn-skip" onclick="skipCard()">Skip</button>
+    <div class="feedback-toast" id="feedback-toast"></div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn btn-flip-mini" id="btn-flip" onclick="flipCard()" style="display:none">↻ Flip</button>
+      <button class="btn btn-reveal" id="btn-reveal" onclick="revealCard()">Reveal Definition</button>
+      <button class="btn btn-next" id="btn-next" onclick="nextCard()" disabled>Next →</button>
+    </div>
+  </div>
+
+  <div class="keyboard-hints">
+    <span><kbd>1</kbd>–<kbd>4</kbd> choose answer</span>
+    <span><kbd>R</kbd> reveal</span>
+    <span><kbd>F</kbd> flip card</span>
+    <span><kbd>Enter</kbd> / <kbd>Space</kbd> next</span>
+    <span><kbd>S</kbd> skip</span>
+  </div>
+</main>
+
+<script>
+const ALL_WORDS = [
+  { word:"abase", pron:"/əˈbeɪs/", pos:"verb", def:"To lower in rank, status, or esteem; to humiliate or degrade.", example:"He refused to abase himself by begging for forgiveness.", synonyms:["degrade","demean","humble","humiliate"] },
+  { word:"abate", pron:"/əˈbeɪt/", pos:"verb", def:"To reduce in amount, degree, or intensity; to subside.", example:"The storm abated by morning, leaving calm waters.", synonyms:["diminish","subside","wane","lessen"] },
+  { word:"aberrant", pron:"/ˈæbərənt/", pos:"adjective", def:"Departing from an accepted standard; deviant from the norm.", example:"The scientist flagged the aberrant results for further analysis.", synonyms:["deviant","anomalous","abnormal","atypical"] },
+  { word:"abeyance", pron:"/əˈbeɪəns/", pos:"noun", def:"A state of temporary suspension or inactivity.", example:"The project was held in abeyance pending new funding.", synonyms:["suspension","dormancy","latency","intermission"] },
+  { word:"abjure", pron:"/æbˈdʒʊr/", pos:"verb", def:"To solemnly renounce or reject a belief, cause, or claim.", example:"He abjured his former political beliefs after the scandal.", synonyms:["renounce","recant","forswear","repudiate"] },
+  { word:"abscond", pron:"/æbˈskɒnd/", pos:"verb", def:"To leave hurriedly and secretly, typically to escape from custody.", example:"The embezzler absconded with millions before authorities arrived.", synonyms:["flee","bolt","escape","vanish"] },
+  { word:"abstemious", pron:"/æbˈstiːmiəs/", pos:"adjective", def:"Not self-indulgent, especially in food and drink; moderate.", example:"Her abstemious diet kept her healthy into old age.", synonyms:["temperate","austere","moderate","frugal"] },
+  { word:"abstruse", pron:"/æbˈstruːs/", pos:"adjective", def:"Difficult to understand; obscure and esoteric in nature.", example:"The professor's abstruse lectures left most students bewildered.", synonyms:["arcane","recondite","esoteric","obscure"] },
+  { word:"accrue", pron:"/əˈkruː/", pos:"verb", def:"To accumulate or receive over time, especially as a benefit.", example:"Interest accrues on the account monthly.", synonyms:["accumulate","amass","gather","collect"] },
+  { word:"acerbic", pron:"/əˈsɜːrbɪk/", pos:"adjective", def:"Sharp and forthright; acidic in tone or manner.", example:"Her acerbic wit made enemies and admirers in equal measure.", synonyms:["caustic","sardonic","mordant","cutting"] },
+  { word:"acrimony", pron:"/ˈækrɪmoʊni/", pos:"noun", def:"Bitterness or ill feeling, especially in speech or manner.", example:"The divorce proceedings were marked by intense acrimony.", synonyms:["bitterness","animosity","rancor","hostility"] },
+  { word:"acumen", pron:"/ˈækjʊmən/", pos:"noun", def:"The ability to make good judgments and quick decisions.", example:"Her business acumen helped the startup thrive in a competitive market.", synonyms:["shrewdness","astuteness","sagacity","perspicacity"] },
+  { word:"adamant", pron:"/ˈædəmənt/", pos:"adjective", def:"Refusing to be persuaded or to change one's mind; unshakeable.", example:"She was adamant that the project deadline could not be moved.", synonyms:["resolute","intransigent","inexorable","implacable"] },
+  { word:"admonish", pron:"/ədˈmɒnɪʃ/", pos:"verb", def:"To warn or reprimand someone firmly; to advise seriously.", example:"The coach admonished the players for their lack of effort.", synonyms:["reprove","chide","rebuke","caution"] },
+  { word:"adroit", pron:"/əˈdrɔɪt/", pos:"adjective", def:"Clever or skillful in using hands or mind.", example:"An adroit negotiator, she secured the deal in record time.", synonyms:["dexterous","deft","nimble","proficient"] },
+  { word:"adulation", pron:"/ˌædjʊˈleɪʃən/", pos:"noun", def:"Excessive admiration or praise.", example:"The actor grew tired of the adulation and retreated from public life.", synonyms:["flattery","fawning","veneration","idolatry"] },
+  { word:"adumbrate", pron:"/ˈædʌmbreɪt/", pos:"verb", def:"To outline or sketch vaguely; to foreshadow or overshadow.", example:"The opening chapter adumbrates the novel's major themes.", synonyms:["outline","foreshadow","suggest","silhouette"] },
+  { word:"affable", pron:"/ˈæfəbəl/", pos:"adjective", def:"Friendly, good-natured, and easy to talk to.", example:"The affable professor was always surrounded by students after class.", synonyms:["amiable","genial","cordial","personable"] },
+  { word:"alacrity", pron:"/əˈlækrɪti/", pos:"noun", def:"Brisk and cheerful readiness to do something.", example:"She accepted the challenge with surprising alacrity.", synonyms:["eagerness","readiness","promptness","enthusiasm"] },
+  { word:"allay", pron:"/əˈleɪ/", pos:"verb", def:"To diminish or put at rest (fear, suspicion, or worry).", example:"The doctor's reassuring words allayed the patient's anxiety.", synonyms:["assuage","relieve","mitigate","soothe"] },
+  { word:"amalgamate", pron:"/əˈmælɡəmeɪt/", pos:"verb", def:"To combine or unite to form one organization or structure.", example:"The two companies amalgamated to form a global conglomerate.", synonyms:["merge","consolidate","integrate","combine"] },
+  { word:"ambiguous", pron:"/æmˈbɪɡjuəs/", pos:"adjective", def:"Open to more than one interpretation; not having one obvious meaning.", example:"The contract contained several ambiguous clauses.", synonyms:["equivocal","unclear","vague","nebulous"] },
+  { word:"ameliorate", pron:"/əˈmiːliəreɪt/", pos:"verb", def:"To make something bad or unsatisfactory better; to improve.", example:"New policies were introduced to ameliorate poverty in the region.", synonyms:["improve","enhance","alleviate","remedy"] },
+  { word:"anachronism", pron:"/əˈnækrənɪzəm/", pos:"noun", def:"A thing belonging to a period other than that in which it exists.", example:"A horse-drawn carriage on the highway seemed an anachronism.", synonyms:["archaism","relic","incongruity","anomaly"] },
+  { word:"anodyne", pron:"/ˈænədaɪn/", pos:"adjective", def:"Not likely to provoke dissent or offense; inoffensively bland.", example:"The politician gave an anodyne response that satisfied no one.", synonyms:["bland","innocuous","inoffensive","insipid"] },
+  { word:"anomalous", pron:"/əˈnɒmələs/", pos:"adjective", def:"Deviating from what is standard, normal, or expected.", example:"The anomalous result forced the team to reconsider their hypothesis.", synonyms:["aberrant","irregular","atypical","deviant"] },
+  { word:"antipathy", pron:"/ænˈtɪpəθi/", pos:"noun", def:"A deep-seated feeling of aversion; dislike.", example:"There was an obvious antipathy between the two rivals.", synonyms:["aversion","hostility","animosity","repugnance"] },
+  { word:"apathy", pron:"/ˈæpəθi/", pos:"noun", def:"Lack of interest, enthusiasm, or concern.", example:"Voter apathy was blamed for the historically low turnout.", synonyms:["indifference","lethargy","disinterest","torpor"] },
+  { word:"apocryphal", pron:"/əˈpɒkrɪfəl/", pos:"adjective", def:"Of doubtful authenticity, although widely circulated as being true.", example:"Many stories about the founding hero are likely apocryphal.", synonyms:["dubious","fictitious","legendary","mythical"] },
+  { word:"appease", pron:"/əˈpiːz/", pos:"verb", def:"To pacify or placate someone by acceding to their demands.", example:"He brought gifts to appease his angry neighbor.", synonyms:["placate","mollify","conciliate","pacify"] },
+  { word:"approbation", pron:"/ˌæprəˈbeɪʃən/", pos:"noun", def:"Approval or praise.", example:"She beamed with pride at her mentor's approbation.", synonyms:["approval","commendation","endorsement","sanction"] },
+  { word:"arcane", pron:"/ɑːrˈkeɪn/", pos:"adjective", def:"Understood by few; mysterious or secret.", example:"The text was filled with arcane symbols only initiates could decode.", synonyms:["esoteric","cryptic","obscure","recondite"] },
+  { word:"arduous", pron:"/ˈɑːrdjuəs/", pos:"adjective", def:"Involving or requiring strenuous effort; difficult and tiring.", example:"The arduous climb took three days and tested every hiker's resolve.", synonyms:["strenuous","grueling","laborious","taxing"] },
+  { word:"arrogate", pron:"/ˈærəɡeɪt/", pos:"verb", def:"To take or claim something without justification.", example:"The general arrogated absolute authority during the crisis.", synonyms:["usurp","seize","appropriate","commandeer"] },
+  { word:"artless", pron:"/ˈɑːrtləs/", pos:"adjective", def:"Without guile or deception; natural and simple.", example:"Her artless honesty was both refreshing and sometimes embarrassing.", synonyms:["guileless","naive","ingenuous","candid"] },
+  { word:"ascetic", pron:"/əˈsɛtɪk/", pos:"adjective", def:"Characterized by severe self-discipline and abstention from indulgence.", example:"The monk led an ascetic life of fasting and prayer.", synonyms:["austere","spartan","abstinent","self-denying"] },
+  { word:"assuage", pron:"/əˈsweɪdʒ/", pos:"verb", def:"To make (an unpleasant feeling) less intense; to relieve.", example:"Nothing could assuage her grief after the loss.", synonyms:["alleviate","relieve","soothe","mitigate"] },
+  { word:"astute", pron:"/əˈstjuːt/", pos:"adjective", def:"Having an ability to accurately assess situations; shrewd.", example:"The astute investor spotted the undervalued stock early.", synonyms:["shrewd","perceptive","sagacious","keen"] },
+  { word:"audacious", pron:"/ɔːˈdeɪʃəs/", pos:"adjective", def:"Showing a willingness to take surprisingly bold risks.", example:"It was an audacious plan, but against all odds it succeeded.", synonyms:["bold","daring","intrepid","brazen"] },
+  { word:"austere", pron:"/ɔːˈstɪr/", pos:"adjective", def:"Severe or strict in manner; without luxury or ornamentation.", example:"The austere dormitory had only a bed and a small desk.", synonyms:["severe","spartan","ascetic","stark"] },
+  { word:"avarice", pron:"/ˈævərɪs/", pos:"noun", def:"Extreme greed for wealth or material gain.", example:"His avarice led him to steal from his own company.", synonyms:["greed","cupidity","rapacity","covetousness"] },
+  { word:"avert", pron:"/əˈvɜːrt/", pos:"verb", def:"To turn away; to prevent or ward off.", example:"Quick action by the fire brigade averted a major disaster.", synonyms:["prevent","ward off","forestall","deflect"] },
+  { word:"banal", pron:"/bəˈnɑːl/", pos:"adjective", def:"So lacking in originality as to be obvious and boring.", example:"The film's banal dialogue drew harsh criticism.", synonyms:["trite","hackneyed","clichéd","pedestrian"] },
+  { word:"belie", pron:"/bɪˈlaɪ/", pos:"verb", def:"To give a false impression of; to contradict.", example:"Her cheerful expression belied her inner turmoil.", synonyms:["contradict","misrepresent","disprove","negate"] },
+  { word:"belligerent", pron:"/bəˈlɪdʒərənt/", pos:"adjective", def:"Hostile and aggressive; engaged in a war or conflict.", example:"The belligerent customer refused every attempt at resolution.", synonyms:["hostile","aggressive","combative","pugnacious"] },
+  { word:"benevolent", pron:"/bəˈnevələnt/", pos:"adjective", def:"Well-meaning and kindly; charitable in intent.", example:"The benevolent donor funded scholarships for hundreds of students.", synonyms:["charitable","philanthropic","altruistic","magnanimous"] },
+  { word:"bombast", pron:"/ˈbɒmbæst/", pos:"noun", def:"High-sounding language with little meaning; inflated speech.", example:"The speech was full of bombast but devoid of substance.", synonyms:["rhetoric","bluster","grandiloquence","pomposity"] },
+  { word:"boon", pron:"/buːn/", pos:"noun", def:"A thing that is helpful or beneficial; a blessing.", example:"The new transit line was a boon for commuters.", synonyms:["blessing","benefit","godsend","windfall"] },
+  { word:"brusque", pron:"/brʌsk/", pos:"adjective", def:"Abrupt or offhand in speech or manner.", example:"His brusque reply left her feeling dismissed.", synonyms:["curt","abrupt","blunt","terse"] },
+  { word:"burgeon", pron:"/ˈbɜːrdʒən/", pos:"verb", def:"To begin to grow or increase rapidly; to flourish.", example:"The startup began to burgeon after its second round of funding.", synonyms:["flourish","thrive","proliferate","expand"] },
+  { word:"cacophony", pron:"/kəˈkɒfəni/", pos:"noun", def:"A harsh, discordant mixture of sounds.", example:"The cacophony of car horns made conversation impossible.", synonyms:["din","discord","dissonance","clamor"] },
+  { word:"cajole", pron:"/kəˈdʒoʊl/", pos:"verb", def:"To persuade someone to do something by sustained coaxing.", example:"She cajoled her reluctant brother into helping with the move.", synonyms:["coax","wheedle","inveigle","beguile"] },
+  { word:"callous", pron:"/ˈkæləs/", pos:"adjective", def:"Showing or having an insensitive and cruel disregard for others.", example:"The callous dismissal of workers shocked the community.", synonyms:["heartless","unfeeling","insensitive","ruthless"] },
+  { word:"candor", pron:"/ˈkændər/", pos:"noun", def:"The quality of being open and honest in expression; frankness.", example:"She appreciated his candor even when his feedback was harsh.", synonyms:["frankness","honesty","forthrightness","bluntness"] },
+  { word:"capricious", pron:"/kəˈprɪʃəs/", pos:"adjective", def:"Given to sudden and unaccountable changes of mood or behavior.", example:"The capricious weather ruined their outdoor plans.", synonyms:["fickle","mercurial","volatile","whimsical"] },
+  { word:"castigate", pron:"/ˈkæstɪɡeɪt/", pos:"verb", def:"To reprimand (someone) severely.", example:"The editor castigated the journalist for the factual errors.", synonyms:["reprove","berate","chastise","rebuke"] },
+  { word:"caustic", pron:"/ˈkɔːstɪk/", pos:"adjective", def:"Sarcastic in a scathing and bitter way.", example:"His caustic humor alienated many potential friends.", synonyms:["sardonic","cutting","mordant","acerbic"] },
+  { word:"censure", pron:"/ˈsɛnʃər/", pos:"noun", def:"The expression of formal disapproval; severe criticism.", example:"The senator faced censure from his colleagues.", synonyms:["condemnation","reproof","rebuke","criticism"] },
+  { word:"chicanery", pron:"/ʃɪˈkeɪnəri/", pos:"noun", def:"The use of trickery to achieve one's purpose.", example:"The deal was full of legal chicanery that exploited loopholes.", synonyms:["trickery","deception","duplicity","subterfuge"] },
+  { word:"circumlocution", pron:"/ˌsɜːrkəmloʊˈkjuːʃən/", pos:"noun", def:"The use of many words where fewer would do; evasive talk.", example:"After minutes of circumlocution, he still hadn't answered the question.", synonyms:["verbosity","periphrasis","prolixity","wordiness"] },
+  { word:"circumscribe", pron:"/ˈsɜːrkəmskraɪb/", pos:"verb", def:"To restrict the range or scope of something.", example:"The law circumscribes the power of the executive branch.", synonyms:["restrict","limit","confine","constrain"] },
+  { word:"cloying", pron:"/ˈklɔɪɪŋ/", pos:"adjective", def:"Disgustingly rich or sweet; overly sentimental.", example:"The film's cloying sentimentality made it hard to watch.", synonyms:["sickening","saccharine","mawkish","unctuous"] },
+  { word:"coalesce", pron:"/ˌkoʊəˈlɛs/", pos:"verb", def:"To come together and form one mass or whole.", example:"Over time, the disparate groups coalesced into a unified movement.", synonyms:["merge","unite","converge","amalgamate"] },
+  { word:"cogent", pron:"/ˈkoʊdʒənt/", pos:"adjective", def:"Powerfully persuasive; clear, logical, and convincing.", example:"She made a cogent argument that swayed the entire committee.", synonyms:["compelling","persuasive","convincing","forceful"] },
+  { word:"commensurate", pron:"/kəˈmɛnʃərɪt/", pos:"adjective", def:"Corresponding in size or degree; in proportion.", example:"The reward was commensurate with the effort she had invested.", synonyms:["proportionate","corresponding","equivalent","matching"] },
+  { word:"compendium", pron:"/kəmˈpɛndiəm/", pos:"noun", def:"A collection of concise but detailed information about a subject.", example:"The encyclopedia was a comprehensive compendium of human knowledge.", synonyms:["compilation","anthology","digest","summary"] },
+  { word:"complaisant", pron:"/kəmˈpleɪzənt/", pos:"adjective", def:"Willing to please others; obliging; compliant.", example:"He was complaisant to a fault, never asserting his own needs.", synonyms:["obliging","amenable","accommodating","deferential"] },
+  { word:"concomitant", pron:"/kənˈkɒmɪtənt/", pos:"adjective", def:"Naturally accompanying or associated with; concurrent.", example:"Rapid industrialization brought concomitant environmental degradation.", synonyms:["accompanying","concurrent","attendant","associated"] },
+  { word:"condone", pron:"/kənˈdoʊn/", pos:"verb", def:"To accept and allow behavior that is considered wrong.", example:"The school does not condone bullying of any kind.", synonyms:["tolerate","overlook","excuse","sanction"] },
+  { word:"confound", pron:"/kənˈfaʊnd/", pos:"verb", def:"To cause surprise or confusion; to prove wrong.", example:"The defendant's alibi confounded the prosecution.", synonyms:["perplex","bewilder","baffle","nonplus"] },
+  { word:"convoluted", pron:"/ˈkɒnvəluːtɪd/", pos:"adjective", def:"Extremely complex and difficult to follow.", example:"The legal document was so convoluted that even lawyers struggled.", synonyms:["intricate","tortuous","labyrinthine","byzantine"] },
+  { word:"corroborate", pron:"/kəˈrɒbəreɪt/", pos:"verb", def:"To confirm or give support to (a statement, theory, or finding).", example:"New evidence corroborated the eyewitness testimony.", synonyms:["confirm","verify","substantiate","validate"] },
+  { word:"credulous", pron:"/ˈkrɛdjʊləs/", pos:"adjective", def:"Having an excessive readiness to believe things.", example:"The credulous tourist paid far too much for the fake antique.", synonyms:["gullible","naive","trusting","unsuspecting"] },
+  { word:"culpable", pron:"/ˈkʌlpəbəl/", pos:"adjective", def:"Deserving blame or censure; at fault.", example:"The investigation found the manager culpable for the accident.", synonyms:["blameworthy","guilty","responsible","liable"] },
+  { word:"cupidity", pron:"/kjuːˈpɪdɪti/", pos:"noun", def:"Greed for money or possessions.", example:"His cupidity drove him to embezzle from charities.", synonyms:["greed","avarice","rapacity","covetousness"] },
+  { word:"dearth", pron:"/dɜːrθ/", pos:"noun", def:"A scarcity or lack of something.", example:"There was a dearth of qualified candidates for the position.", synonyms:["scarcity","shortage","paucity","deficiency"] },
+  { word:"debunk", pron:"/diːˈbʌŋk/", pos:"verb", def:"To expose the falseness or hollowness of (a myth or belief).", example:"The documentary debunked several popular historical myths.", synonyms:["expose","disprove","refute","discredit"] },
+  { word:"decorous", pron:"/ˈdɛkərəs/", pos:"adjective", def:"In keeping with good taste and propriety; proper and polite.", example:"The guests were expected to behave in a decorous manner.", synonyms:["seemly","proper","dignified","refined"] },
+  { word:"deference", pron:"/ˈdɛfərəns/", pos:"noun", def:"Humble submission and respect toward authority or seniority.", example:"Out of deference to her elders, she did not argue.", synonyms:["respect","submission","reverence","obeisance"] },
+  { word:"demagogue", pron:"/ˈdɛməɡɒɡ/", pos:"noun", def:"A leader who appeals to popular desires rather than rational argument.", example:"The demagogue stirred up fear to consolidate his political power.", synonyms:["agitator","rabble-rouser","firebrand","incendiary"] },
+  { word:"denigrate", pron:"/ˈdɛnɪɡreɪt/", pos:"verb", def:"To criticize unfairly; to disparage.", example:"He had a habit of denigrating his rivals behind their backs.", synonyms:["disparage","belittle","vilify","malign"] },
+  { word:"depravity", pron:"/dɪˈprævɪti/", pos:"noun", def:"Moral corruption; wickedness.", example:"The novel explored the depravity that emerges under absolute power.", synonyms:["wickedness","corruption","immorality","debauchery"] },
+  { word:"deride", pron:"/dɪˈraɪd/", pos:"verb", def:"To express contempt for; to ridicule or mock.", example:"Critics derided the film as formulaic and shallow.", synonyms:["mock","ridicule","scoff","scorn"] },
+  { word:"derivative", pron:"/dɪˈrɪvətɪv/", pos:"adjective", def:"Imitative of the work of another person; not original.", example:"The artwork was derivative, showing little independent style.", synonyms:["imitative","unoriginal","borrowed","secondary"] },
+  { word:"desiccate", pron:"/ˈdɛsɪkeɪt/", pos:"verb", def:"To remove moisture from; to cause to become dry.", example:"The desert heat desiccated the vegetation.", synonyms:["dehydrate","dry out","parch","wither"] },
+  { word:"despondent", pron:"/dɪˈspɒndənt/", pos:"adjective", def:"In low spirits from loss of hope or courage.", example:"After repeated rejections, she grew despondent about her chances.", synonyms:["dejected","desolate","forlorn","disconsolate"] },
+  { word:"despot", pron:"/ˈdɛspɒt/", pos:"noun", def:"A ruler who holds absolute power, typically one who exercises it tyrannically.", example:"The despot suppressed all opposition with brutal efficiency.", synonyms:["tyrant","dictator","autocrat","oppressor"] },
+  { word:"diaphanous", pron:"/daɪˈæfənəs/", pos:"adjective", def:"Very light, delicate, and translucent; sheer.", example:"She wore a diaphanous veil that floated in the breeze.", synonyms:["sheer","translucent","gossamer","filmy"] },
+  { word:"dichotomy", pron:"/daɪˈkɒtəmi/", pos:"noun", def:"A division into two opposed parts or groups.", example:"The lecture explored the dichotomy between nature and nurture.", synonyms:["division","split","contrast","polarity"] },
+  { word:"diffident", pron:"/ˈdɪfɪdənt/", pos:"adjective", def:"Modest or shy due to a lack of self-confidence.", example:"A diffident speaker, she rarely volunteered her opinions.", synonyms:["shy","timid","reticent","hesitant"] },
+  { word:"dilatory", pron:"/ˈdɪlətɒri/", pos:"adjective", def:"Slow to act; causing delay.", example:"His dilatory approach to paperwork frustrated his colleagues.", synonyms:["procrastinating","tardy","slow","laggard"] },
+  { word:"disabuse", pron:"/ˌdɪsəˈbjuːz/", pos:"verb", def:"To persuade someone that an idea is mistaken.", example:"Her mentor disabused her of the notion that talent alone guarantees success.", synonyms:["disillusion","enlighten","correct","undeceive"] },
+  { word:"discern", pron:"/dɪˈsɜːrn/", pos:"verb", def:"To recognize or identify something; to perceive clearly.", example:"It was difficult to discern the truth from the conflicting accounts.", synonyms:["perceive","detect","distinguish","identify"] },
+  { word:"discordant", pron:"/dɪˈskɔːrdənt/", pos:"adjective", def:"Disagreeing or incongruous; not in harmony.", example:"A discordant note in the symphony ruined the performance.", synonyms:["dissonant","incongruous","conflicting","jarring"] },
+  { word:"disparate", pron:"/ˈdɪspərɪt/", pos:"adjective", def:"Essentially different in kind; not allowing comparison.", example:"The two studies reached disparate conclusions.", synonyms:["different","dissimilar","divergent","incongruent"] },
+  { word:"dispassionate", pron:"/dɪsˈpæʃənɪt/", pos:"adjective", def:"Not influenced by strong emotion; rational and impartial.", example:"The judge gave a dispassionate assessment of the evidence.", synonyms:["objective","impartial","detached","unbiased"] },
+  { word:"dissemble", pron:"/dɪˈsɛmbəl/", pos:"verb", def:"To conceal or disguise one's true feelings or beliefs.", example:"He dissembled his disappointment behind a bright smile.", synonyms:["conceal","feign","camouflage","dissimulate"] },
+  { word:"dogmatic", pron:"/dɒɡˈmætɪk/", pos:"adjective", def:"Inclined to lay down principles as incontrovertibly true.", example:"His dogmatic insistence on one method stifled creative thinking.", synonyms:["doctrinaire","rigid","inflexible","opinionated"] },
+  { word:"dupe", pron:"/djuːp/", pos:"verb", def:"To deceive or trick someone into doing something.", example:"She was duped into signing away her rights.", synonyms:["deceive","hoodwink","delude","bamboozle"] },
+  { word:"ebullience", pron:"/ɪˈbʌliəns/", pos:"noun", def:"The quality of being cheerful and full of energy; exuberance.", example:"Her natural ebullience made her a favorite host.", synonyms:["exuberance","vivacity","enthusiasm","buoyancy"] },
+  { word:"eclectic", pron:"/ɪˈklɛktɪk/", pos:"adjective", def:"Deriving ideas from a broad and diverse range of sources.", example:"Her eclectic taste in music ranged from opera to hip-hop.", synonyms:["diverse","varied","broad-ranging","heterogeneous"] },
+  { word:"efficacy", pron:"/ˈɛfɪkəsi/", pos:"noun", def:"The ability to produce a desired or intended result.", example:"Researchers questioned the efficacy of the new treatment.", synonyms:["effectiveness","potency","power","efficiency"] },
+  { word:"egregious", pron:"/ɪˈɡriːdʒəs/", pos:"adjective", def:"Outstandingly bad; shocking and conspicuously wrong.", example:"The referee's egregious error cost the team the championship.", synonyms:["flagrant","glaring","outrageous","scandalous"] },
+  { word:"elegy", pron:"/ˈɛlɪdʒi/", pos:"noun", def:"A mournful poem or song, typically lamenting the dead.", example:"He wrote a moving elegy for his departed friend.", synonyms:["lament","dirge","threnody","requiem"] },
+  { word:"elicit", pron:"/ɪˈlɪsɪt/", pos:"verb", def:"To evoke or draw out (a response, answer, or fact).", example:"The question elicited a passionate response from the audience.", synonyms:["evoke","extract","draw out","induce"] },
+  { word:"eloquent", pron:"/ˈɛləkwənt/", pos:"adjective", def:"Fluent or persuasive in speaking or writing.", example:"Her eloquent speech moved the crowd to tears.", synonyms:["articulate","persuasive","expressive","fluent"] },
+  { word:"embroil", pron:"/ɪmˈbrɔɪl/", pos:"verb", def:"To involve (someone) deeply in a difficult situation.", example:"He was embroiled in a legal dispute that lasted for years.", synonyms:["entangle","implicate","enmesh","involve"] },
+  { word:"emollient", pron:"/ɪˈmɒliənt/", pos:"adjective", def:"Having a softening or soothing effect; placating.", example:"His emollient tone helped ease the tense negotiation.", synonyms:["soothing","softening","mollifying","assuaging"] },
+  { word:"empirical", pron:"/ɛmˈpɪrɪkəl/", pos:"adjective", def:"Based on observation or experience rather than theory.", example:"The researchers lacked empirical data to support their claim.", synonyms:["observational","experiential","evidence-based","practical"] },
+  { word:"enervate", pron:"/ˈɛnərveɪt/", pos:"verb", def:"To weaken or drain of energy or vitality.", example:"The oppressive heat enervated even the most energetic workers.", synonyms:["weaken","debilitate","drain","sap"] },
+  { word:"enigmatic", pron:"/ˌɛnɪɡˈmætɪk/", pos:"adjective", def:"Difficult to interpret or understand; mysterious.", example:"The Mona Lisa's enigmatic smile has puzzled viewers for centuries.", synonyms:["mysterious","cryptic","inscrutable","puzzling"] },
+  { word:"ephemeral", pron:"/ɪˈfɛmərəl/", pos:"adjective", def:"Lasting for a very short time; transitory.", example:"Fame in the digital age is often ephemeral.", synonyms:["transient","fleeting","transitory","evanescent"] },
+  { word:"equivocate", pron:"/ɪˈkwɪvəkeɪt/", pos:"verb", def:"To use ambiguous language to avoid committing to a position.", example:"He equivocated when pressed for a straight answer.", synonyms:["hedge","prevaricate","temporize","waver"] },
+  { word:"erudite", pron:"/ˈɛrʊdaɪt/", pos:"adjective", def:"Having or showing great knowledge or learning.", example:"Her erudite commentary revealed years of meticulous research.", synonyms:["learned","scholarly","knowledgeable","well-read"] },
+  { word:"esoteric", pron:"/ˌɛsəˈtɛrɪk/", pos:"adjective", def:"Intended for or understood by only a small specialized group.", example:"The paper's esoteric references lost most general readers.", synonyms:["arcane","obscure","abstruse","recondite"] },
+  { word:"evanescent", pron:"/ˌɛvəˈnɛsənt/", pos:"adjective", def:"Soon passing out of sight, memory, or existence.", example:"The rainbow was evanescent, fading within minutes.", synonyms:["fleeting","ephemeral","transient","brief"] },
+  { word:"exacerbate", pron:"/ɪɡˈzæsərbeɪt/", pos:"verb", def:"To make a problem, bad situation, or negative feeling worse.", example:"Cutting the budget would only exacerbate the housing crisis.", synonyms:["worsen","aggravate","intensify","inflame"] },
+  { word:"excoriate", pron:"/ɪkˈskɔːrieɪt/", pos:"verb", def:"To criticize someone or something severely.", example:"The review excoriated the new policy as reckless.", synonyms:["denounce","berate","castigate","lambaste"] },
+  { word:"exculpate", pron:"/ˈɛkskʌlpeɪt/", pos:"verb", def:"To show or declare that someone is not guilty of wrongdoing.", example:"New evidence exculpated the accused man.", synonyms:["exonerate","absolve","acquit","vindicate"] },
+  { word:"exigent", pron:"/ˈɛksɪdʒənt/", pos:"adjective", def:"Requiring immediate attention; pressing; demanding.", example:"The exigent circumstances left no time for deliberation.", synonyms:["urgent","pressing","critical","demanding"] },
+  { word:"exonerate", pron:"/ɪɡˈzɒnəreɪt/", pos:"verb", def:"To officially absolve from blame or a criminal charge.", example:"DNA evidence exonerated the man after fifteen years in prison.", synonyms:["absolve","acquit","vindicate","exculpate"] },
+  { word:"expedient", pron:"/ɪkˈspiːdiənt/", pos:"adjective", def:"Convenient and practical rather than morally correct.", example:"It was expedient to settle the lawsuit quickly rather than face trial.", synonyms:["convenient","pragmatic","advisable","politic"] },
+  { word:"extant", pron:"/ˈɛkstənt/", pos:"adjective", def:"Still in existence; not destroyed or lost.", example:"Only a few of the original manuscripts are extant.", synonyms:["surviving","existing","remaining","preserved"] },
+  { word:"extricate", pron:"/ˈɛkstrɪkeɪt/", pos:"verb", def:"To free someone or something from a constraint or difficulty.", example:"She struggled to extricate herself from the awkward conversation.", synonyms:["free","disentangle","release","extract"] },
+  { word:"facetious", pron:"/fəˈsiːʃəs/", pos:"adjective", def:"Treating serious issues with inappropriate humor; flippant.", example:"His facetious remarks during the funeral were deeply inappropriate.", synonyms:["flippant","frivolous","glib","tongue-in-cheek"] },
+  { word:"fallacious", pron:"/fəˈleɪʃəs/", pos:"adjective", def:"Based on a mistaken belief; containing a fallacy.", example:"The argument rested on fallacious assumptions.", synonyms:["erroneous","false","misleading","deceptive"] },
+  { word:"fastidious", pron:"/fæˈstɪdiəs/", pos:"adjective", def:"Very attentive to detail; hard to please; overly concerned.", example:"A fastidious editor, she caught every grammatical nuance.", synonyms:["meticulous","particular","fussy","punctilious"] },
+  { word:"fatuous", pron:"/ˈfætʃuəs/", pos:"adjective", def:"Silly and pointless; complacently self-satisfied.", example:"His fatuous grin indicated he hadn't understood a word.", synonyms:["foolish","inane","vacuous","asinine"] },
+  { word:"fawn", pron:"/fɔːn/", pos:"verb", def:"To seek favor or attention by excessive flattery.", example:"He fawned over the celebrity at every opportunity.", synonyms:["grovel","kowtow","toady","flatter"] },
+  { word:"fervent", pron:"/ˈfɜːrvənt/", pos:"adjective", def:"Having or displaying a passionate intensity.", example:"She was a fervent advocate for prison reform.", synonyms:["passionate","ardent","zealous","vehement"] },
+  { word:"flagrant", pron:"/ˈfleɪɡrənt/", pos:"adjective", def:"Conspicuously or obviously offensive; blatant.", example:"The ruling was a flagrant violation of constitutional rights.", synonyms:["blatant","glaring","egregious","brazen"] },
+  { word:"florid", pron:"/ˈflɒrɪd/", pos:"adjective", def:"Elaborately or excessively intricate; overly ornate.", example:"His florid writing style was full of unnecessary embellishment.", synonyms:["ornate","flowery","grandiloquent","rococo"] },
+  { word:"foment", pron:"/fəˈmɛnt/", pos:"verb", def:"To instigate or stir up (unrest or trouble).", example:"The demagogue sought to foment discontent among the populace.", synonyms:["incite","agitate","provoke","instigate"] },
+  { word:"forbearance", pron:"/fɔːrˈbɛərəns/", pos:"noun", def:"Patient restraint; clemency and tolerance.", example:"She showed great forbearance in dealing with the difficult child.", synonyms:["patience","tolerance","restraint","leniency"] },
+  { word:"forestall", pron:"/fɔːrˈstɔːl/", pos:"verb", def:"To prevent or obstruct by taking advance action.", example:"The company released a statement to forestall speculation.", synonyms:["preempt","prevent","preclude","avert"] },
+  { word:"fractious", pron:"/ˈfrækʃəs/", pos:"adjective", def:"Irritable and quarrelsome; difficult to manage.", example:"The fractious team required a skilled manager to keep the peace.", synonyms:["quarrelsome","irritable","cantankerous","contentious"] },
+  { word:"frugal", pron:"/ˈfruːɡəl/", pos:"adjective", def:"Sparing or economical with regard to money or food.", example:"His frugal habits allowed him to save a significant sum.", synonyms:["thrifty","economical","sparing","parsimonious"] },
+  { word:"furtive", pron:"/ˈfɜːrtɪv/", pos:"adjective", def:"Attempting to avoid notice or attention; secretive.", example:"She cast a furtive glance over her shoulder.", synonyms:["secretive","stealthy","surreptitious","covert"] },
+  { word:"garrulous", pron:"/ˈɡærʊləs/", pos:"adjective", def:"Excessively talkative, especially on trivial matters.", example:"The garrulous stranger at the bar told his life story within minutes.", synonyms:["loquacious","verbose","voluble","chatty"] },
+  { word:"germane", pron:"/dʒɜːrˈmeɪn/", pos:"adjective", def:"Relevant to a subject; pertinent.", example:"Only comments germane to the agenda item were allowed.", synonyms:["relevant","pertinent","applicable","apropos"] },
+  { word:"glib", pron:"/ɡlɪb/", pos:"adjective", def:"Fluent but insincere; showing little thought or preparation.", example:"His glib answers failed to impress the skeptical panel.", synonyms:["facile","slick","superficial","smooth"] },
+  { word:"grandiloquent", pron:"/ɡrænˈdɪləkwənt/", pos:"adjective", def:"Pompous or extravagant in language, style, or manner.", example:"His grandiloquent speech impressed few with its hollow rhetoric.", synonyms:["pompous","bombastic","grandiose","rhetorical"] },
+  { word:"gregarious", pron:"/ɡrɪˈɡɛəriəs/", pos:"adjective", def:"Fond of company; sociable.", example:"Her gregarious nature made her the center of every social event.", synonyms:["sociable","convivial","outgoing","affable"] },
+  { word:"guile", pron:"/ɡaɪl/", pos:"noun", def:"Sly or cunning intelligence; deceitfulness.", example:"He used guile rather than force to achieve his goals.", synonyms:["cunning","craftiness","deceit","trickery"] },
+  { word:"hackneyed", pron:"/ˈhæknid/", pos:"adjective", def:"Lacking in originality; overused and thus uninspiring.", example:"The essay was full of hackneyed phrases that the professor had seen countless times.", synonyms:["clichéd","trite","banal","overworked"] },
+  { word:"hapless", pron:"/ˈhæpləs/", pos:"adjective", def:"Unlucky; unfortunate.", example:"The hapless investor lost everything in the crash.", synonyms:["unfortunate","unlucky","luckless","ill-fated"] },
+  { word:"harangue", pron:"/həˈræŋ/", pos:"noun", def:"A lengthy and aggressive speech; a tirade.", example:"His harangue about workplace safety lasted over an hour.", synonyms:["tirade","lecture","diatribe","polemic"] },
+  { word:"haughty", pron:"/ˈhɔːti/", pos:"adjective", def:"Arrogantly superior and disdainful; snobbish.", example:"Her haughty demeanor alienated those who might have been allies.", synonyms:["arrogant","supercilious","imperious","disdainful"] },
+  { word:"hegemony", pron:"/hɪˈdʒɛməni/", pos:"noun", def:"Leadership or dominance, especially by one country over others.", example:"The empire maintained its hegemony through military might and trade.", synonyms:["dominance","supremacy","leadership","authority"] },
+  { word:"hubris", pron:"/ˈhjuːbrɪs/", pos:"noun", def:"Excessive pride or self-confidence that invites downfall.", example:"His hubris led him to underestimate the competition.", synonyms:["arrogance","conceit","presumption","pride"] },
+  { word:"iconoclast", pron:"/aɪˈkɒnəklæst/", pos:"noun", def:"A person who attacks or criticizes cherished beliefs or institutions.", example:"The scientist was an iconoclast who challenged every received theory.", synonyms:["dissenter","rebel","nonconformist","radical"] },
+  { word:"idiosyncratic", pron:"/ˌɪdiəsɪŋˈkrætɪk/", pos:"adjective", def:"Peculiar or individual; relating to a personal quirk.", example:"Her idiosyncratic style of painting was immediately recognizable.", synonyms:["eccentric","quirky","unusual","personal"] },
+  { word:"ignominious", pron:"/ˌɪɡnəˈmɪniəs/", pos:"adjective", def:"Deserving or causing public disgrace or shame.", example:"The team suffered an ignominious defeat in the final.", synonyms:["humiliating","shameful","disgraceful","mortifying"] },
+  { word:"immutable", pron:"/ɪˈmjuːtəbəl/", pos:"adjective", def:"Unchanging over time; unable to be changed.", example:"The laws of physics are considered immutable.", synonyms:["unchangeable","fixed","permanent","invariable"] },
+  { word:"impeccable", pron:"/ɪmˈpɛkəbəl/", pos:"adjective", def:"In accordance with the highest standards; faultless.", example:"His impeccable manners made him a welcome guest everywhere.", synonyms:["flawless","faultless","perfect","irreproachable"] },
+  { word:"imperturbable", pron:"/ˌɪmpəˈtɜːrbəbəl/", pos:"adjective", def:"Unable to be upset or excited; calm and serene.", example:"The surgeon remained imperturbable even during the crisis.", synonyms:["unflappable","composed","serene","placid"] },
+  { word:"impervious", pron:"/ɪmˈpɜːrviəs/", pos:"adjective", def:"Not allowing entrance or passage; unable to be affected.", example:"She seemed impervious to criticism of any kind.", synonyms:["immune","resistant","insusceptible","unmoved"] },
+  { word:"implacable", pron:"/ɪmˈplækəbəl/", pos:"adjective", def:"Unable to be appeased or placated; unrelenting.", example:"He was an implacable opponent of the proposed reform.", synonyms:["inexorable","relentless","unappeasable","inflexible"] },
+  { word:"impudent", pron:"/ˈɪmpjʊdənt/", pos:"adjective", def:"Not showing due respect; bold and disrespectful.", example:"His impudent response shocked the entire board.", synonyms:["insolent","impertinent","brazen","cheeky"] },
+  { word:"impugn", pron:"/ɪmˈpjuːn/", pos:"verb", def:"To dispute the truth, validity, or honesty of something.", example:"The attorney tried to impugn the credibility of the witness.", synonyms:["challenge","dispute","question","contradict"] },
+  { word:"inchoate", pron:"/ɪnˈkoʊɪt/", pos:"adjective", def:"Just begun and not fully formed or developed.", example:"His inchoate ideas needed time to crystallize into a plan.", synonyms:["undeveloped","nascent","embryonic","rudimentary"] },
+  { word:"incorrigible", pron:"/ɪnˈkɒrɪdʒɪbəl/", pos:"adjective", def:"Not able to be corrected, improved, or reformed.", example:"He was an incorrigible optimist, no matter the circumstances.", synonyms:["irredeemable","hopeless","inveterate","hardened"] },
+  { word:"indolent", pron:"/ˈɪndələnt/", pos:"adjective", def:"Having or showing a disposition to avoid exertion; lazy.", example:"The indolent student left everything to the last minute.", synonyms:["lazy","slothful","sluggish","idle"] },
+  { word:"ineffable", pron:"/ɪnˈɛfəbəl/", pos:"adjective", def:"Too great or extreme to be expressed in words.", example:"There was an ineffable beauty to the mountain landscape.", synonyms:["indescribable","inexpressible","unutterable","transcendent"] },
+  { word:"inexorable", pron:"/ɪnˈɛksərəbəl/", pos:"adjective", def:"Impossible to stop or prevent; relentless.", example:"The inexorable march of time waits for no one.", synonyms:["relentless","implacable","unstoppable","unyielding"] },
+  { word:"ingenuous", pron:"/ɪnˈdʒɛnjuəs/", pos:"adjective", def:"Innocent and unsuspecting; naively frank and honest.", example:"Her ingenuous trust in strangers worried her parents.", synonyms:["naive","guileless","artless","innocent"] },
+  { word:"inimical", pron:"/ɪˈnɪmɪkəl/", pos:"adjective", def:"Tending to obstruct or harm; unfriendly; hostile.", example:"A sedentary lifestyle is inimical to long-term health.", synonyms:["hostile","harmful","adverse","antagonistic"] },
+  { word:"iniquity", pron:"/ɪˈnɪkwɪti/", pos:"noun", def:"Immoral or grossly unfair behavior; wickedness.", example:"The investigation exposed decades of corporate iniquity.", synonyms:["wickedness","sin","evil","injustice"] },
+  { word:"innocuous", pron:"/ɪˈnɒkjuəs/", pos:"adjective", def:"Not harmful or offensive; inoffensive.", example:"The medication appeared innocuous but had hidden side effects.", synonyms:["harmless","inoffensive","safe","benign"] },
+  { word:"inscrutable", pron:"/ɪnˈskruːtəbəl/", pos:"adjective", def:"Impossible to understand or interpret; mysterious.", example:"His inscrutable expression gave nothing away.", synonyms:["enigmatic","mysterious","unfathomable","cryptic"] },
+  { word:"insipid", pron:"/ɪnˈsɪpɪd/", pos:"adjective", def:"Lacking flavor, vigor, or interest; dull.", example:"The insipid plot failed to hold the audience's attention.", synonyms:["bland","dull","vapid","tedious"] },
+  { word:"intransigent", pron:"/ɪnˈtrænsɪdʒənt/", pos:"adjective", def:"Refusing to change one's views or agree to a compromise.", example:"Both sides were too intransigent for a negotiated solution.", synonyms:["uncompromising","inflexible","stubborn","obdurate"] },
+  { word:"invective", pron:"/ɪnˈvɛktɪv/", pos:"noun", def:"Insulting, abusive, or highly critical language.", example:"The editorial was filled with invective against the administration.", synonyms:["abuse","vitriol","denunciation","vituperation"] },
+  { word:"laconic", pron:"/ləˈkɒnɪk/", pos:"adjective", def:"Using very few words; brief and concise in speech.", example:"His laconic reply—'No.'—ended the discussion.", synonyms:["terse","succinct","concise","brief"] },
+  { word:"languid", pron:"/ˈlæŋɡwɪd/", pos:"adjective", def:"Showing or having very little energy or vitality; slow.", example:"She moved with languid grace in the summer heat.", synonyms:["lethargic","listless","sluggish","leisurely"] },
+  { word:"laud", pron:"/lɔːd/", pos:"verb", def:"To praise highly; to extol.", example:"Critics lauded the debut novel as a masterpiece.", synonyms:["praise","extol","acclaim","commend"] },
+  { word:"loquacious", pron:"/loʊˈkweɪʃəs/", pos:"adjective", def:"Tending to talk a great deal; garrulous.", example:"After a glass of wine, even the shyest person became loquacious.", synonyms:["garrulous","verbose","voluble","chatty"] },
+  { word:"lucid", pron:"/ˈluːsɪd/", pos:"adjective", def:"Expressed clearly; easy to understand.", example:"Her lucid explanation made the complex topic accessible to all.", synonyms:["clear","cogent","articulate","transparent"] },
+  { word:"magnanimous", pron:"/mæɡˈnænɪməs/", pos:"adjective", def:"Generous or forgiving, especially toward a rival or enemy.", example:"The magnanimous victor made peace rather than gloating.", synonyms:["generous","benevolent","noble","forgiving"] },
+  { word:"maladroit", pron:"/ˌmæləˈdrɔɪt/", pos:"adjective", def:"Inefficient or clumsy; lacking in social grace.", example:"His maladroit attempt at humor fell flat.", synonyms:["clumsy","awkward","inept","bungling"] },
+  { word:"malevolent", pron:"/məˈlɛvələnt/", pos:"adjective", def:"Having or showing a wish to do evil to others.", example:"The novel's malevolent villain was genuinely terrifying.", synonyms:["malicious","vindictive","spiteful","vicious"] },
+  { word:"malleable", pron:"/ˈmæliəbəl/", pos:"adjective", def:"Easily influenced; capable of being shaped or altered.", example:"Young minds are malleable and quick to absorb new information.", synonyms:["pliable","flexible","impressionable","adaptable"] },
+  { word:"mendacious", pron:"/mɛnˈdeɪʃəs/", pos:"adjective", def:"Not telling the truth; lying.", example:"The mendacious politician was ultimately exposed by investigative reporters.", synonyms:["dishonest","deceitful","lying","duplicitous"] },
+  { word:"mercurial", pron:"/mɜːrˈkjʊəriəl/", pos:"adjective", def:"Subject to sudden or unpredictable changes of mood.", example:"Her mercurial temperament made it hard to predict her reactions.", synonyms:["volatile","capricious","fickle","erratic"] },
+  { word:"meticulous", pron:"/mɪˈtɪkjʊləs/", pos:"adjective", def:"Showing great attention to detail; very careful and precise.", example:"The restorer's meticulous work brought the painting back to life.", synonyms:["precise","thorough","fastidious","painstaking"] },
+  { word:"mitigate", pron:"/ˈmɪtɪɡeɪt/", pos:"verb", def:"To make less severe, serious, or painful.", example:"Flood barriers helped to mitigate the damage.", synonyms:["alleviate","reduce","diminish","lessen"] },
+  { word:"mordant", pron:"/ˈmɔːrdənt/", pos:"adjective", def:"Sharp and biting; having a mordant wit or humor.", example:"Her mordant humor kept audiences laughing even during dark moments.", synonyms:["caustic","sardonic","trenchant","cutting"] },
+  { word:"mundane", pron:"/mʌnˈdeɪn/", pos:"adjective", def:"Lacking interest or excitement; ordinary and typical.", example:"He longed to escape the mundane routine of office life.", synonyms:["ordinary","routine","prosaic","banal"] },
+  { word:"nascent", pron:"/ˈneɪsənt/", pos:"adjective", def:"Just coming into existence and beginning to develop.", example:"The nascent democracy faced many challenges.", synonyms:["emerging","incipient","embryonic","budding"] },
+  { word:"nefarious", pron:"/nɪˈfɛəriəs/", pos:"adjective", def:"Wicked or criminal; villainous.", example:"The nefarious scheme involved bribery at the highest levels.", synonyms:["wicked","villainous","criminal","heinous"] },
+  { word:"neophyte", pron:"/ˈniːəfaɪt/", pos:"noun", def:"A person who is new to a subject or activity; a beginner.", example:"As a neophyte in the kitchen, she relied on simple recipes.", synonyms:["novice","beginner","tyro","apprentice"] },
+  { word:"nonchalant", pron:"/ˌnɒnʃəˈlɑːnt/", pos:"adjective", def:"Feeling or appearing casually calm and relaxed.", example:"He was nonchalant about the test, even though the stakes were high.", synonyms:["casual","indifferent","blasé","unconcerned"] },
+  { word:"nugatory", pron:"/ˈnjuːɡətɒri/", pos:"adjective", def:"Of no value or importance; worthless.", example:"The amendment was nugatory, having no practical effect.", synonyms:["worthless","trivial","inconsequential","trifling"] },
+  { word:"obdurate", pron:"/ˈɒbdʊrɪt/", pos:"adjective", def:"Stubbornly refusing to change one's opinion; hardened against persuasion.", example:"He remained obdurate despite all the evidence against him.", synonyms:["stubborn","intransigent","inflexible","adamant"] },
+  { word:"obsequious", pron:"/əbˈsiːkwiəs/", pos:"adjective", def:"Obedient or attentive to an excessive degree; servile.", example:"His obsequious flattery irritated his boss rather than winning favor.", synonyms:["sycophantic","fawning","servile","unctuous"] },
+  { word:"obstinate", pron:"/ˈɒbstɪnɪt/", pos:"adjective", def:"Stubbornly refusing to change one's attitude or position.", example:"The obstinate child refused to eat any vegetables.", synonyms:["stubborn","pigheaded","headstrong","tenacious"] },
+  { word:"obtuse", pron:"/əbˈtjuːs/", pos:"adjective", def:"Annoyingly insensitive or slow to understand.", example:"He was too obtuse to realize the insult had been aimed at him.", synonyms:["dense","dull","slow","imperceptive"] },
+  { word:"officious", pron:"/əˈfɪʃəs/", pos:"adjective", def:"Asserting authority in a domineering way; intrusively eager to offer help.", example:"The officious bureaucrat demanded three forms of identification.", synonyms:["meddlesome","intrusive","bossy","domineering"] },
+  { word:"onerous", pron:"/ˈɒnərəs/", pos:"adjective", def:"Involving an amount of effort that is oppressively burdensome.", example:"The onerous contract terms deterred potential investors.", synonyms:["burdensome","demanding","arduous","taxing"] },
+  { word:"opaque", pron:"/oʊˈpeɪk/", pos:"adjective", def:"Not able to be seen through; hard to understand.", example:"The regulation was written in opaque bureaucratic language.", synonyms:["unclear","murky","cryptic","impenetrable"] },
+  { word:"opprobrium", pron:"/əˈproʊbriəm/", pos:"noun", def:"Harsh criticism or censure; public disgrace.", example:"The betrayal brought opprobrium upon the entire organization.", synonyms:["disgrace","ignominy","infamy","obloquy"] },
+  { word:"ostracize", pron:"/ˈɒstrəsaɪz/", pos:"verb", def:"To exclude from society or a group; to banish by popular consent.", example:"The whistleblower was ostracized by former colleagues.", synonyms:["shun","exclude","blacklist","exile"] },
+  { word:"palliate", pron:"/ˈpæliɪt/", pos:"verb", def:"To make less severe without removing the cause; to alleviate.", example:"The medication palliated the symptoms but did not cure the disease.", synonyms:["alleviate","ease","mitigate","relieve"] },
+  { word:"parsimonious", pron:"/ˌpɑːrsɪˈmoʊniəs/", pos:"adjective", def:"Extremely unwilling to spend money; excessively frugal.", example:"His parsimonious nature meant he never bought anything on impulse.", synonyms:["miserly","stingy","niggardly","penurious"] },
+  { word:"partisan", pron:"/ˌpɑːrtɪˈzæn/", pos:"adjective", def:"Prejudiced in favor of a particular cause; biased.", example:"The report was criticized as too partisan to be credible.", synonyms:["biased","partial","one-sided","sectarian"] },
+  { word:"paucity", pron:"/ˈpɔːsɪti/", pos:"noun", def:"The presence of something only in small or insufficient quantities.", example:"A paucity of evidence hampered the investigation.", synonyms:["scarcity","dearth","shortage","lack"] },
+  { word:"pedantic", pron:"/pɪˈdæntɪk/", pos:"adjective", def:"Overly concerned with minor details or formalism.", example:"His pedantic corrections drove his colleagues to distraction.", synonyms:["fussy","nitpicking","bookish","hair-splitting"] },
+  { word:"penury", pron:"/ˈpɛnjʊri/", pos:"noun", def:"Extreme poverty; a scarcity of money or resources.", example:"The poet lived in penury throughout his creative life.", synonyms:["poverty","destitution","indigence","pauperism"] },
+  { word:"perfidy", pron:"/ˈpɜːrfɪdi/", pos:"noun", def:"The state of being deceitful and untrustworthy; treachery.", example:"He was betrayed by the perfidy of a trusted ally.", synonyms:["treachery","betrayal","duplicity","faithlessness"] },
+  { word:"perfunctory", pron:"/pəˈfʌŋktəri/", pos:"adjective", def:"Carried out with minimal effort; lacking care or interest.", example:"He gave a perfunctory apology that convinced no one.", synonyms:["cursory","superficial","mechanical","careless"] },
+  { word:"perspicacious", pron:"/ˌpɜːrspɪˈkeɪʃəs/", pos:"adjective", def:"Having a ready insight; shrewd and discerning.", example:"A perspicacious reader noticed the subtle contradiction.", synonyms:["insightful","shrewd","perceptive","astute"] },
+  { word:"petulant", pron:"/ˈpɛtʃʊlənt/", pos:"adjective", def:"Childishly sulky or bad-tempered.", example:"His petulant response to criticism was embarrassing to witness.", synonyms:["sulky","sullen","pouty","peevish"] },
+  { word:"placid", pron:"/ˈplæsɪd/", pos:"adjective", def:"Not easily upset or excited; calm and peaceful.", example:"The placid lake reflected the surrounding mountains perfectly.", synonyms:["calm","serene","tranquil","composed"] },
+  { word:"platitude", pron:"/ˈplætɪtjuːd/", pos:"noun", def:"A remark or statement that is overused and lacks originality.", example:"His speech was full of platitudes and offered no fresh insight.", synonyms:["cliché","truism","commonplace","bromide"] },
+  { word:"polemic", pron:"/pəˈlɛmɪk/", pos:"noun", def:"A strong verbal or written attack on someone or something.", example:"The essay was a fierce polemic against corporate greed.", synonyms:["diatribe","tirade","harangue","invective"] },
+  { word:"pragmatic", pron:"/præɡˈmætɪk/", pos:"adjective", def:"Dealing with things practically; realistic.", example:"She took a pragmatic approach to problem-solving.", synonyms:["practical","realistic","sensible","commonsensical"] },
+  { word:"precipitous", pron:"/prɪˈsɪpɪtəs/", pos:"adjective", def:"Dangerously high or steep; done without consideration; hasty.", example:"A precipitous decline in stock prices alarmed investors.", synonyms:["steep","abrupt","hasty","sheer"] },
+  { word:"prevaricate", pron:"/prɪˈværɪkeɪt/", pos:"verb", def:"To speak or act evasively; to lie or equivocate.", example:"He continued to prevaricate when asked about his whereabouts.", synonyms:["equivocate","hedge","evade","dissemble"] },
+  { word:"probity", pron:"/ˈproʊbɪti/", pos:"noun", def:"The quality of having strong moral principles; integrity.", example:"Her probity was unquestioned throughout a long career.", synonyms:["integrity","honesty","rectitude","uprightness"] },
+  { word:"prodigal", pron:"/ˈprɒdɪɡəl/", pos:"adjective", def:"Spending money or resources freely and recklessly; wastefully extravagant.", example:"His prodigal spending left him bankrupt within a year.", synonyms:["wasteful","extravagant","profligate","spendthrift"] },
+  { word:"prolix", pron:"/ˈproʊlɪks/", pos:"adjective", def:"Using or containing too many words; tediously lengthy.", example:"His prolix writing style could be condensed to a fraction of its length.", synonyms:["wordy","verbose","long-winded","rambling"] },
+  { word:"propitious", pron:"/prəˈpɪʃəs/", pos:"adjective", def:"Giving or indicating a good chance of success; favorable.", example:"It seemed a propitious moment to launch the product.", synonyms:["favorable","auspicious","promising","encouraging"] },
+  { word:"prosaic", pron:"/proʊˈzeɪɪk/", pos:"adjective", def:"Lacking imagination; commonplace.", example:"His prosaic speech received only polite applause.", synonyms:["mundane","ordinary","banal","pedestrian"] },
+  { word:"puerile", pron:"/ˈpjʊəraɪl/", pos:"adjective", def:"Childishly silly and immature.", example:"The comedian's puerile jokes failed to amuse the adult audience.", synonyms:["childish","immature","juvenile","inane"] },
+  { word:"pugnacious", pron:"/pʌɡˈneɪʃəs/", pos:"adjective", def:"Eager or quick to argue, quarrel, or fight.", example:"The pugnacious pundit picked fights with every other panelist.", synonyms:["aggressive","combative","belligerent","quarrelsome"] },
+  { word:"querulous", pron:"/ˈkwɛrʊləs/", pos:"adjective", def:"Complaining in a petulant or whining manner.", example:"The querulous customer complained about every dish.", synonyms:["complaining","petulant","whining","grumbling"] },
+  { word:"quixotic", pron:"/kwɪkˈsɒtɪk/", pos:"adjective", def:"Exceedingly idealistic; unrealistic and impractical.", example:"The quixotic quest for perfection led to years of delay.", synonyms:["idealistic","impractical","utopian","chimerical"] },
+  { word:"rancor", pron:"/ˈræŋkər/", pos:"noun", def:"Bitterness or resentfulness, especially when long-standing.", example:"Years of rancor between the families erupted at the wedding.", synonyms:["bitterness","animosity","acrimony","resentment"] },
+  { word:"rapacious", pron:"/rəˈpeɪʃəs/", pos:"adjective", def:"Aggressively greedy; plundering.", example:"The rapacious corporation gobbled up competitors without mercy.", synonyms:["greedy","grasping","voracious","avaricious"] },
+  { word:"recalcitrant", pron:"/rɪˈkælsɪtrənt/", pos:"adjective", def:"Having an obstinately uncooperative attitude toward authority.", example:"The recalcitrant student refused to follow any classroom rules.", synonyms:["uncooperative","defiant","intractable","refractory"] },
+  { word:"recondite", pron:"/ˈrɛkəndaɪt/", pos:"adjective", def:"Not known by many people; abstruse; dealing with obscure subjects.", example:"The scholar specialized in recondite aspects of medieval history.", synonyms:["obscure","arcane","abstruse","esoteric"] },
+  { word:"redolent", pron:"/ˈrɛdələnt/", pos:"adjective", def:"Strongly reminiscent or suggestive of; fragrant.", example:"The café was redolent of fresh bread and coffee.", synonyms:["suggestive","evocative","reminiscent","fragrant"] },
+  { word:"refute", pron:"/rɪˈfjuːt/", pos:"verb", def:"To prove (a statement or theory) to be wrong or false.", example:"The scientist refuted the claims with experimental evidence.", synonyms:["disprove","rebut","debunk","counter"] },
+  { word:"relegate", pron:"/ˈrɛlɪɡeɪt/", pos:"verb", def:"To assign to an inferior position; to demote.", example:"The new discovery relegated the old theory to a footnote.", synonyms:["demote","downgrade","consign","exile"] },
+  { word:"reticent", pron:"/ˈrɛtɪsənt/", pos:"adjective", def:"Not revealing one's thoughts or feelings readily; reserved.", example:"He was reticent about his personal life even with close friends.", synonyms:["reserved","taciturn","restrained","uncommunicative"] },
+  { word:"rhetoric", pron:"/ˈrɛtərɪk/", pos:"noun", def:"Language designed to have a persuasive or impressive effect.", example:"The politician's soaring rhetoric masked the weakness of the policy.", synonyms:["oratory","eloquence","language","bombast"] },
+  { word:"sagacious", pron:"/səˈɡeɪʃəs/", pos:"adjective", def:"Having or showing keen mental discernment and good judgment; wise.", example:"The sagacious mentor offered advice that proved invaluable.", synonyms:["wise","judicious","shrewd","perspicacious"] },
+  { word:"sanctimonious", pron:"/ˌsæŋktɪˈmoʊniəs/", pos:"adjective", def:"Making a show of being morally superior; self-righteously pious.", example:"His sanctimonious lectures on diet while eating junk food annoyed everyone.", synonyms:["self-righteous","pious","hypocritical","unctuous"] },
+  { word:"sanguine", pron:"/ˈsæŋɡwɪn/", pos:"adjective", def:"Optimistic, especially in a difficult situation.", example:"He remained sanguine about the company's future despite the losses.", synonyms:["optimistic","hopeful","positive","confident"] },
+  { word:"sardonic", pron:"/sɑːrˈdɒnɪk/", pos:"adjective", def:"Grimly mocking or cynical.", example:"His sardonic smile suggested he knew exactly what was going to happen.", synonyms:["cynical","mocking","sarcastic","wry"] },
+  { word:"scrupulous", pron:"/ˈskruːpjʊləs/", pos:"adjective", def:"Diligent, thorough, and attentive to detail; strictly ethical.", example:"The scrupulous accountant never allowed even minor irregularities.", synonyms:["meticulous","conscientious","principled","rigorous"] },
+  { word:"sedulous", pron:"/ˈsɛdjʊləs/", pos:"adjective", def:"Showing dedication and diligence; persevering.", example:"Through sedulous practice, she became a virtuoso.", synonyms:["diligent","assiduous","industrious","painstaking"] },
+  { word:"serendipity", pron:"/ˌsɛrənˈdɪpɪti/", pos:"noun", def:"The occurrence and development of events by chance in a beneficial way.", example:"Finding the job was pure serendipity—she wasn't even looking.", synonyms:["luck","chance","fortune","fluke"] },
+  { word:"soporific", pron:"/ˌsɒpəˈrɪfɪk/", pos:"adjective", def:"Tending to induce drowsiness or sleep; tediously uninteresting.", example:"The soporific lecture had half the room nodding off.", synonyms:["sleep-inducing","boring","tedious","hypnotic"] },
+  { word:"specious", pron:"/ˈspiːʃəs/", pos:"adjective", def:"Superficially plausible but actually wrong; misleading.", example:"The specious argument sounded convincing but was fundamentally flawed.", synonyms:["deceptive","misleading","fallacious","plausible-seeming"] },
+  { word:"sporadic", pron:"/spəˈrædɪk/", pos:"adjective", def:"Occurring at irregular intervals; not continuous.", example:"Sporadic outbreaks of unrest continued for several months.", synonyms:["irregular","intermittent","occasional","scattered"] },
+  { word:"spurious", pron:"/ˈspjʊəriəs/", pos:"adjective", def:"Not being what it purports to be; false or fake.", example:"The letter was revealed to be spurious, forged decades later.", synonyms:["fake","fraudulent","false","counterfeit"] },
+  { word:"stoic", pron:"/ˈstoʊɪk/", pos:"adjective", def:"Enduring pain or hardship without showing feelings or complaining.", example:"She bore her illness with stoic dignity.", synonyms:["impassive","unemotional","phlegmatic","long-suffering"] },
+  { word:"strident", pron:"/ˈstraɪdənt/", pos:"adjective", def:"Loud and harsh; presenting a point of view in an excessively forceful way.", example:"The strident demands of protestors grew increasingly difficult to ignore.", synonyms:["harsh","shrill","vociferous","clamorous"] },
+  { word:"stymie", pron:"/ˈstaɪmi/", pos:"verb", def:"To prevent or hinder the progress of.", example:"Budget cuts stymied the development of new programs.", synonyms:["hinder","obstruct","impede","thwart"] },
+  { word:"supercilious", pron:"/ˌsuːpəˈsɪliəs/", pos:"adjective", def:"Behaving as if one is superior to others; arrogantly dismissive.", example:"His supercilious attitude made him deeply unpopular.", synonyms:["haughty","arrogant","contemptuous","disdainful"] },
+  { word:"supplant", pron:"/səˈplɑːnt/", pos:"verb", def:"To supersede and replace; to uproot and take the place of.", example:"Streaming services have supplanted traditional cable television.", synonyms:["replace","supersede","displace","oust"] },
+  { word:"sycophant", pron:"/ˈsɪkəfænt/", pos:"noun", def:"A person who uses flattery to gain favor from those with influence.", example:"The CEO was surrounded by sycophants who told him only what he wanted to hear.", synonyms:["flatterer","toady","fawner","yes-man"] },
+  { word:"taciturn", pron:"/ˈtæsɪtɜːrn/", pos:"adjective", def:"Reserved or uncommunicative in speech; saying little.", example:"The taciturn detective listened more than he spoke.", synonyms:["reticent","reserved","silent","laconic"] },
+  { word:"tendentious", pron:"/tɛnˈdɛnʃəs/", pos:"adjective", def:"Promoting a particular cause or point of view; biased.", example:"The documentary was criticized as tendentious and one-sided.", synonyms:["biased","partisan","partial","slanted"] },
+  { word:"timorous", pron:"/ˈtɪmərəs/", pos:"adjective", def:"Showing or suffering from nervousness or a lack of confidence.", example:"The timorous student barely spoke above a whisper in class.", synonyms:["timid","fearful","nervous","diffident"] },
+  { word:"torpor", pron:"/ˈtɔːrpər/", pos:"noun", def:"A state of physical or mental inactivity; lethargy.", example:"The post-lunch torpor settled over the office.", synonyms:["lethargy","sluggishness","inertia","dormancy"] },
+  { word:"tractable", pron:"/ˈtræktəbəl/", pos:"adjective", def:"Easy to deal with or control; docile and manageable.", example:"The tractable student always followed instructions eagerly.", synonyms:["manageable","docile","compliant","amenable"] },
+  { word:"transient", pron:"/ˈtrænziənt/", pos:"adjective", def:"Lasting only for a short time; impermanent.", example:"The relief was transient, fading within hours.", synonyms:["temporary","fleeting","ephemeral","brief"] },
+  { word:"trepidation", pron:"/ˌtrɛpɪˈdeɪʃən/", pos:"noun", def:"A feeling of fear or agitation about something that may happen.", example:"She entered the exam room with great trepidation.", synonyms:["anxiety","apprehension","dread","nervousness"] },
+  { word:"truculent", pron:"/ˈtrʌkjʊlənt/", pos:"adjective", def:"Eager or quick to argue or fight; aggressively defiant.", example:"The truculent union leader refused to negotiate.", synonyms:["aggressive","belligerent","combative","defiant"] },
+  { word:"turgid", pron:"/ˈtɜːrdʒɪd/", pos:"adjective", def:"Swollen; (of language) pompous and tedious.", example:"The report was written in turgid academic prose.", synonyms:["bombastic","pompous","overwrought","inflated"] },
+  { word:"ubiquitous", pron:"/juːˈbɪkwɪtəs/", pos:"adjective", def:"Present, appearing, or found everywhere.", example:"Smartphones have become ubiquitous in modern society.", synonyms:["omnipresent","pervasive","universal","prevalent"] },
+  { word:"unctuous", pron:"/ˈʌŋktʃuəs/", pos:"adjective", def:"Excessively flattering; slickly ingratiating.", example:"The unctuous salesman made everyone uncomfortable.", synonyms:["sycophantic","obsequious","fawning","oily"] },
+  { word:"undermine", pron:"/ˌʌndəˈmaɪn/", pos:"verb", def:"To erode the base or foundation of something; to weaken gradually.", example:"Constant criticism undermined her confidence.", synonyms:["weaken","subvert","sabotage","erode"] },
+  { word:"vacuous", pron:"/ˈvækjuəs/", pos:"adjective", def:"Having or showing a lack of thought or intelligence; meaningless.", example:"The interview devolved into a vacuous exchange of platitudes.", synonyms:["empty","inane","vapid","mindless"] },
+  { word:"venerate", pron:"/ˈvɛnəreɪt/", pos:"verb", def:"To regard with great respect; to revere.", example:"The community venerated the elder as a source of wisdom.", synonyms:["revere","respect","honor","idolize"] },
+  { word:"veracious", pron:"/vəˈreɪʃəs/", pos:"adjective", def:"Speaking or representing the truth; truthful.", example:"She was known as a veracious journalist who never embellished.", synonyms:["truthful","honest","accurate","reliable"] },
+  { word:"verbose", pron:"/vɜːrˈboʊs/", pos:"adjective", def:"Using or expressed in more words than are needed.", example:"His verbose emails could always be condensed to a single sentence.", synonyms:["wordy","prolix","long-winded","garrulous"] },
+  { word:"vex", pron:"/vɛks/", pos:"verb", def:"To make (someone) feel annoyed, frustrated, or worried.", example:"The unsolvable puzzle vexed him for weeks.", synonyms:["irritate","annoy","irk","exasperate"] },
+  { word:"vilify", pron:"/ˈvɪlɪfaɪ/", pos:"verb", def:"To speak or write about in an abusively disparaging manner.", example:"Political opponents were systematically vilified in state media.", synonyms:["denigrate","defame","malign","slander"] },
+  { word:"volatile", pron:"/ˈvɒlətaɪl/", pos:"adjective", def:"Liable to change rapidly and unpredictably; tending to violence.", example:"The volatile market sent investors into a panic.", synonyms:["unstable","mercurial","unpredictable","erratic"] },
+  { word:"voluble", pron:"/ˈvɒljʊbəl/", pos:"adjective", def:"Talking fluently, readily, or incessantly.", example:"The voluble tour guide rarely paused for breath.", synonyms:["garrulous","loquacious","verbose","talkative"] },
+  { word:"wanton", pron:"/ˈwɒntən/", pos:"adjective", def:"Open and unrestrained; deliberate and uncalled for.", example:"The wanton destruction of cultural artifacts shocked the world.", synonyms:["gratuitous","indiscriminate","reckless","unprovoked"] },
+  { word:"wary", pron:"/ˈwɛəri/", pos:"adjective", def:"Feeling or showing caution about possible dangers or problems.", example:"She was wary of his overly friendly approach.", synonyms:["cautious","vigilant","guarded","suspicious"] },
+  { word:"winsome", pron:"/ˈwɪnsəm/", pos:"adjective", def:"Attractive or appealing in a fresh, innocent way.", example:"The child's winsome smile charmed everyone in the room.", synonyms:["appealing","charming","engaging","endearing"] },
+  { word:"zealot", pron:"/ˈzɛlət/", pos:"noun", def:"A person who is fanatical and uncompromising in pursuit of ideals.", example:"She was a zealot for environmental protection.", synonyms:["fanatic","extremist","radical","enthusiast"] },
+  { word:"zeal", pron:"/ziːl/", pos:"noun", def:"Great energy or enthusiasm in pursuit of a cause or objective.", example:"She approached the project with remarkable zeal.", synonyms:["enthusiasm","fervor","passion","ardor"] },
+];
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let deck = [];
+let currentIndex = 0;
+let isFlipped = false;
+let isAnswered = false;
+let wasCorrect = false;
+let correctCount = 0;
+let wrongCount = 0;
+let streak = 0;
+let currentCategory = 'all';
+let learningWords = new Set();
+let currentOptions = [];
+
+const LABELS = ['A', 'B', 'C', 'D'];
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildOptions(correctWord) {
+  const samePos = ALL_WORDS.filter(w => w.word !== correctWord.word && w.pos === correctWord.pos);
+  const diffPos = ALL_WORDS.filter(w => w.word !== correctWord.word && w.pos !== correctWord.pos);
+  const pool = shuffle([...samePos, ...diffPos]);
+  const distractors = pool.slice(0, 3);
+  return shuffle([correctWord, ...distractors]).map(w => ({
+    def: w.def,
+    isCorrect: w.word === correctWord.word
+  }));
+}
+
+// ── CATEGORY ──────────────────────────────────────────────────────────────
+function setCategory(cat, btn) {
+  currentCategory = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  if (cat === 'all') {
+    deck = shuffle([...ALL_WORDS]);
+  } else if (cat === 'learning') {
+    deck = shuffle(ALL_WORDS.filter(w => learningWords.has(w.word)));
+    if (!deck.length) {
+      alert("No words in your review pile yet! Answer a question wrong to add words here.");
+      setCategory('all', document.querySelector('.filter-btn'));
+      return;
+    }
+  } else {
+    deck = shuffle(ALL_WORDS.filter(w => w.pos === cat));
+  }
+
+  currentIndex = 0;
+  resetState();
+  loadCard();
+}
+
+// ── LOAD CARD ─────────────────────────────────────────────────────────────
+function loadCard() {
+  if (!deck.length) return;
+  const word = deck[currentIndex];
+
+  document.getElementById('card-num').textContent = `#${currentIndex + 1}`;
+  document.getElementById('card-pos-front').textContent = word.pos;
+  document.getElementById('word-display').textContent = word.word;
+  document.getElementById('word-pron').textContent = word.pron;
+
+  document.getElementById('card-pos-back').textContent = word.pos;
+  document.getElementById('back-word').textContent = word.word;
+  document.getElementById('back-pos-label').textContent = word.pos;
+  document.getElementById('back-def').textContent = word.def;
+  document.getElementById('back-example').textContent = '"' + word.example + '"';
+  document.getElementById('back-synonyms').innerHTML =
+    word.synonyms.map(s => `<span class="synonym-tag">${s}</span>`).join('');
+
+  const pct = ((currentIndex + 1) / deck.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `${currentIndex + 1} / ${deck.length}`;
+
+  currentOptions = buildOptions(word);
+  renderOptions();
+
+  // button reset
+  setBtn('btn-reveal', true, '');
+  setBtn('btn-next', false, '');
+  setBtn('btn-skip', true, '');
+  document.getElementById('btn-flip').style.display = 'none';
+  hideToast();
+}
+
+// ── RENDER OPTIONS ────────────────────────────────────────────────────────
+function renderOptions() {
+  const grid = document.getElementById('mcq-grid');
+  grid.innerHTML = '';
+  currentOptions.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'mcq-option';
+    btn.innerHTML = `<span class="opt-label">Option ${LABELS[i]}</span>${opt.def}`;
+    btn.onclick = () => selectOption(i);
+    grid.appendChild(btn);
+  });
+}
+
+// ── SELECT OPTION ─────────────────────────────────────────────────────────
+function selectOption(idx) {
+  if (isAnswered) return;
+  isAnswered = true;
+
+  const chosen = currentOptions[idx];
+  wasCorrect = chosen.isCorrect;
+
+  applyOptionFeedback(idx, false);
+  glowCard(wasCorrect);
+
+  if (wasCorrect) {
+    correctCount++;
+    streak++;
+    showToast('Correct! 🎉', 'ok');
+    const badge = document.getElementById('streak-badge');
+    document.getElementById('streak-num').textContent = streak;
+    if (streak >= 3) badge.classList.add('visible');
+  } else {
+    wrongCount++;
+    streak = 0;
+    document.getElementById('streak-badge').classList.remove('visible');
+    learningWords.add(deck[currentIndex].word);
+    showToast('Not quite — definition is below', 'bad');
+    // auto-flip to show correct answer
+    setTimeout(() => doFlip(true), 450);
+  }
+
+  updateStats();
+  setBtn('btn-next', true, '');
+  setBtn('btn-reveal', false, '');
+  setBtn('btn-skip', false, '');
+  document.getElementById('btn-flip').style.display = '';
+}
+
+// ── REVEAL ────────────────────────────────────────────────────────────────
+function revealCard() {
+  if (isAnswered) return;
+  isAnswered = true;
+  wasCorrect = false;
+
+  applyOptionFeedback(null, true);
+  wrongCount++;
+  streak = 0;
+  document.getElementById('streak-badge').classList.remove('visible');
+  learningWords.add(deck[currentIndex].word);
+  updateStats();
+
+  doFlip(true);
+  setBtn('btn-next', true, '');
+  setBtn('btn-reveal', false, '');
+  setBtn('btn-skip', false, '');
+  document.getElementById('btn-flip').style.display = '';
+  showToast('Added to review pile', 'bad');
+}
+
+// ── APPLY FEEDBACK TO OPTIONS ─────────────────────────────────────────────
+function applyOptionFeedback(chosenIdx, revealMode) {
+  const btns = document.querySelectorAll('.mcq-option');
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (currentOptions[i].isCorrect) {
+      btn.classList.add(revealMode ? 'reveal-correct' : 'correct');
+    } else if (!revealMode && i === chosenIdx) {
+      btn.classList.add('wrong');
+    }
+  });
+}
+
+// ── FLIP ──────────────────────────────────────────────────────────────────
+function flipCard() {
+  if (!isAnswered) return;
+  doFlip(!isFlipped);
+}
+
+function doFlip(state) {
+  isFlipped = state;
+  document.getElementById('card-inner').classList.toggle('flipped', isFlipped);
+  document.getElementById('btn-flip').textContent = isFlipped ? '↻ Word' : '↻ Flip';
+}
+
+// ── NEXT ──────────────────────────────────────────────────────────────────
+function nextCard() {
+  if (!isAnswered) return;
+  animateOut(() => {
+    currentIndex = (currentIndex + 1) % deck.length;
+    resetState();
+    loadCard();
+  }, wasCorrect ? 'right' : 'left');
+}
+
+// ── SKIP ──────────────────────────────────────────────────────────────────
+function skipCard() {
+  if (isAnswered) return;
+  animateOut(() => {
+    currentIndex = (currentIndex + 1) % deck.length;
+    resetState();
+    loadCard();
+  }, 'right');
+}
+
+// ── RESET ─────────────────────────────────────────────────────────────────
+function resetState() {
+  isFlipped = false;
+  isAnswered = false;
+  wasCorrect = false;
+  document.getElementById('card-inner').classList.remove('flipped');
+  document.getElementById('card-front-face').classList.remove('correct-glow', 'wrong-glow');
+}
+
+// ── GLOW ──────────────────────────────────────────────────────────────────
+function glowCard(correct) {
+  const face = document.getElementById('card-front-face');
+  face.classList.remove('correct-glow', 'wrong-glow');
+  face.classList.add(correct ? 'correct-glow' : 'wrong-glow');
+}
+
+// ── STATS ──────────────────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('correct-count').textContent = correctCount;
+  document.getElementById('wrong-count').textContent = wrongCount;
+  document.getElementById('streak-count').textContent = streak;
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────
+function showToast(msg, type) {
+  const t = document.getElementById('feedback-toast');
+  t.textContent = msg;
+  t.className = `feedback-toast ${type} show`;
+}
+function hideToast() {
+  document.getElementById('feedback-toast').className = 'feedback-toast';
+}
+
+// ── BTN HELPERS ────────────────────────────────────────────────────────────
+function setBtn(id, enabled, text) {
+  const b = document.getElementById(id);
+  b.disabled = !enabled;
+  if (text) b.textContent = text;
+}
+
+// ── ANIMATE ───────────────────────────────────────────────────────────────
+function animateOut(cb, dir) {
+  const scene = document.getElementById('card-scene');
+  const dx = dir === 'right' ? '40px' : '-40px';
+  scene.style.transition = 'opacity 0.18s, transform 0.18s';
+  scene.style.opacity = '0';
+  scene.style.transform = `translateX(${dx})`;
+  setTimeout(() => {
+    cb();
+    scene.style.opacity = '0';
+    scene.style.transition = '';
+    scene.style.transform = `translateX(${dir === 'right' ? '-28px' : '28px'})`;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        scene.style.transition = 'opacity 0.22s, transform 0.22s';
+        scene.style.opacity = '1';
+        scene.style.transform = 'translateX(0)';
+        setTimeout(() => { scene.style.transition = ''; }, 220);
+      });
+    });
+  }, 180);
+}
+
+// ── KEYBOARD ──────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
+  switch (e.key) {
+    case '1': selectOption(0); break;
+    case '2': selectOption(1); break;
+    case '3': selectOption(2); break;
+    case '4': selectOption(3); break;
+    case 'r': case 'R': if (!isAnswered) revealCard(); break;
+    case 'f': case 'F': flipCard(); break;
+    case 's': case 'S': skipCard(); break;
+    case ' ':
+    case 'Enter':
+      e.preventDefault();
+      if (isAnswered) nextCard();
+      break;
+  }
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+deck = shuffle([...ALL_WORDS]);
+loadCard();
+</script>
+</body>
+</html>
